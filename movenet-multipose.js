@@ -77,7 +77,7 @@ async function loadImage(fileName, inputSize) {
     const resize = tf.image.resizeBilinear(expand, [inputSize, inputSize]);
     const cast = tf.cast(resize, 'int32');
     const tensor = cast;
-    const img = { fileName, tensor, inputShape: buffer?.shape, modelShape: tensor?.shape, size: buffer?.size };
+    const img = { fileName, tensor, inputShape: buffer.shape, modelShape: tensor.shape, size: buffer.size };
     return img;
   });
   return obj;

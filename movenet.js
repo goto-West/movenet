@@ -77,7 +77,7 @@ async function loadImage(fileName, inputSize) {
     const resize = tf.image.resizeBilinear(expand, [inputSize, inputSize]);
     const cast = tf.cast(resize, 'int32');
     const tensor = cast;
-    const img = { fileName, tensor, inputShape: buffer?.shape, modelShape: tensor?.shape, size: buffer?.size };
+    const img = { fileName, tensor, inputShape: buffer.shape, modelShape: tensor.shape, size: buffer.size };
     return img;
   });
   return obj;
@@ -140,14 +140,24 @@ async function main() {
 
   // process results
   const results = await processResults(res, img);
+
   const t2 = process.hrtime.bigint();
   log.info('Processing time:', Math.round(parseInt((t2 - t1).toString()) / 1000 / 1000), 'ms');
 
   // print results
   log.data('Results:', results);
 
+  const v1 = {};
+  const v2 = {};
+
+  //vector nv1 = normalize(v1);
+  //vector nv2 = normalize(v2);
+
+  //float angle = acos(mul(nv1, nv2));
+
   // save processed image
   await saveImage(results, img);
+
 }
 
 main();
