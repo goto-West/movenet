@@ -1,3 +1,6 @@
+
+//script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"
+
 const fs = require('fs');
 const path = require('path');
 const process = require('process');
@@ -5,6 +8,7 @@ const log = require('@vladmandic/pilogger');
 const tf = require('@tensorflow/tfjs-node');
 const canvas = require('canvas');
 
+//모델 활용
 const modelOptions = {
   // modelPath: 'file://model-lightning3/movenet-lightning.json',
   modelPath: 'file://model-lightning4/movenet-lightning.json',
@@ -13,6 +17,50 @@ const modelOptions = {
 };
 
 const bodyParts = ['nose', 'leftEye', 'rightEye', 'leftEar', 'rightEar', 'leftShoulder', 'rightShoulder', 'leftElbow', 'rightElbow', 'leftWrist', 'rightWrist', 'leftHip', 'rightHip', 'leftKnee', 'rightKnee', 'leftAnkle', 'rightAnkle'];
+
+//save joint results to csv file
+async function saveCSV(res){
+
+  var a = "";
+
+  //jquery 활용
+  //convert results to csvString
+  $(res).each(function(idx,value){
+    a += value.label + "," + item.x + "," + item.y + "\r\n";
+  });
+  a += "\n";
+
+  //convert to csv file
+  const fileName = "test.csv";
+  var csvContent = "data:text/csv'charset=utf-8" ;
+  var blob = new Blob(["\uFEFF"+csv], {type: 'text/csv; charset=utf-8'});
+  
+  // write canvas to jpeg
+  /*const outImage = `outputs/${path.basename(img.fileName)}`;
+  const out = fs.createWriteStream(outImage);
+  out.on('finish', () => log.state('Created output image:', outImage, 'size:', [c.width, c.height]));
+  out.on('error', (err) => log.error('Error creating image:', outImage, err));
+  const stream = c.createJPEGStream({ quality: 0.6, progressive: true, chromaSubsampling: true });
+  stream.pipe(out);
+  */
+
+   // (D) FILE HANDLER & FILE STREAM
+   const fileHandle = await window.showSaveFilePicker({
+    suggestedName : "demo.csv",
+    types: [{
+      description: "CSV file",
+      accept: {"text/csv": [".csv"]}
+    }]
+  });
+  const fileStream = await fileHandle.createWritable();
+ 
+  // (E) WRITE FILE
+  await fileStream.write(myBlob);
+  await fileStream.close();
+
+
+} 
+
 
 // save image with processed results
 async function saveImage(res, img) {
@@ -83,6 +131,7 @@ async function loadImage(fileName, inputSize) {
   return obj;
 }
 
+//output
 async function processResults(res, img) {
   const data = res.arraySync();
   log.info('Tensor output', res.shape);
@@ -105,6 +154,7 @@ async function processResults(res, img) {
   return parts;
 }
 
+// main 
 async function main() {
   log.header();
 
@@ -150,14 +200,21 @@ async function main() {
   const v1 = {};
   const v2 = {};
 
+
+  
+
+  //save result image
+  //to compare exact location of joint from each skeleton data
+  await saveImage(results, img);
+  //await saveCSV(results);
+
+
+  //벡터부분 코드 저장
+  //count vector data
   //vector nv1 = normalize(v1);
   //vector nv2 = normalize(v2);
-
   //float angle = acos(mul(nv1, nv2));
-
   // save processed image
-  await saveImage(results, img);
-
 }
 
 main();
