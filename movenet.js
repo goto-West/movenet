@@ -1,5 +1,4 @@
 
-//script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"
 
 const fs = require('fs');
 const path = require('path');
@@ -7,8 +6,9 @@ const process = require('process');
 const log = require('@vladmandic/pilogger');
 const tf = require('@tensorflow/tfjs-node');
 const canvas = require('canvas');
+const { pow } = require('@tensorflow/tfjs-node');
 
-//모델 활용
+//model list
 const modelOptions = {
   // modelPath: 'file://model-lightning3/movenet-lightning.json',
   modelPath: 'file://model-lightning4/movenet-lightning.json',
@@ -154,6 +154,64 @@ async function processResults(res, img) {
   return parts;
 }
 
+async function ComputeAngle(a,b,c){
+  /*
+  var o1 = Math.atan((array[7].y - array[5].y) / (array[7].x - array[5].x));
+  var o2 = Math.atan((array[11].y - array[5].y) / (array[11].x - array[5].x));
+  var ang1 = 180 - (o1-o2) * 180/Math.PI;
+  */
+
+  var aa = Math.sqrt(Math.pow(a.x -c.x,2) + Math.pow(a.y - c.y ,2));
+  var bb = Math.sqrt(Math.pow(a.x -b.x,2) + Math.pow(a.y - b.y ,2));
+  var cc = Math.sqrt(Math.pow(b.x -c.x,2) + Math.pow(b.y - c.y ,2));
+
+  temp = (Math.pow(bb,2) + Math.pow(cc,2) - Math.pow(aa,2)) / (2*bb*cc);
+
+  var ang = Math.acos(temp);
+
+  ang = ang*(180/Math.PI);
+  log.info('angle :', ang);
+  return ang;
+}
+
+// compute angle between three dots
+async function getAngle(array){
+
+/*
+  //original computation code
+  var o1 = Math.atan((p1.y-p2.y),(p1.x-p2.x));
+  var o2 = Math.atan((p2.y-p3.y)/(p2.x-p3.x));
+  
+  var ang1 = (o1-o2) * 180/Math.PI;
+  log.info('angle computation result :', ang1);
+*/
+
+  //angle 1 - right elow [8], right shoulder [6], right hip [12]
+  ComputeAngle(array[8],array[6],array[12]);
+
+  //angle 2 - left elow[7], left shoulder[5], left hip[11]                                                                           
+  ComputeAngle(array[7],array[5],array[11]);
+
+  //angle 3 - right shoulder[6], right elow[8], right wrist[10]
+  ComputeAngle(array[6],array[8],array[10]);
+
+  //angle 4 - left shoulder[5], left elow[7], left wrist[9]
+  ComputeAngle(array[5],array[7],array[9]);
+
+  //angle 5 - left hip[11], right hip[12], right knee[14]
+  ComputeAngle(array[11],array[12],array[14]);
+
+  //angle 6 - right hip[12], left hip[11], left knee[13]
+  ComputeAngle(array[12],array[11],array[13]);
+
+  //angle 7 - right hip[12], right knee[14] right ankle[16] 
+  ComputeAngle(array[12],array[14],array[16]);
+
+  //angle 8 - left hip[11], left knee[13], left ankle[15]
+  ComputeAngle(array[11],array[13],array[15]);
+
+}
+
 // main 
 async function main() {
   log.header();
@@ -196,25 +254,16 @@ async function main() {
 
   // print results
   log.data('Results:', results);
-
-  const v1 = {};
-  const v2 = {};
-
-
   
 
   //save result image
   //to compare exact location of joint from each skeleton data
-  await saveImage(results, img);
-  //await saveCSV(results);
+  //await saveImage(results, img);
 
+  //joint 값을 활용하여 8개의 앵글 값 추출
+  await getAngle(results);
 
-  //벡터부분 코드 저장
-  //count vector data
-  //vector nv1 = normalize(v1);
-  //vector nv2 = normalize(v2);
-  //float angle = acos(mul(nv1, nv2));
-  // save processed image
 }
+
 
 main();
