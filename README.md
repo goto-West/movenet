@@ -1,3 +1,5 @@
+앵글 import를 위한 작업 진행
+
 # MoveNet: Body Segmentation for TFJS and NodeJS
 
 Models are included in `/model-*` folders  
