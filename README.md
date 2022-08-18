@@ -44,9 +44,6 @@ Function `processResults()` takes `model.execute` output and returns array of 17
 
 ## Test
 
-```shell
-node movenet.js inputs/model1.jpg
-```
 
 ```js
 2021-05-29 16:32:48 INFO:  movenet version 0.0.1
